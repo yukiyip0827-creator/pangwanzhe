@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>《旁觀者》— 照顧者情緒舒緩遊戲</title>
+  <style>
+    :root {
+      --bg-deep: #0f1c2e;
+      --bg-soft: #1a2a40;
+      --accent: #7eb8da;
+      --accent-soft: #a8d4ec;
+      --text: #e8f0f7;
+      --text-muted: #a0b4c8;
+      --card-bg: rgba(255, 255, 255, 0.06);
+      --card-border: rgba(126, 184, 218, 0.25);
+      --success: #8fd4a0;
+      --warm: #f0c9a0;
+      --danger: #e08080;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: "PingFang HK", "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+      background: var(--bg-deep);
+      color: var(--text);
+      min-height: 100dvh;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    .screen {
+      display: none;
+      min-height: 100dvh;
+      padding: 24px 20px 40px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.6s ease;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes breathe {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.03); }
+    }
+
+    .breathe-circle {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(126,184,218,0.25) 0%, transparent 70%);
+      animation: breathe 4s ease-in-out infinite;
+      margin-bottom: 32px;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 500;
+      text-align: center;
+      margin-bottom: 16px;
+      letter-spacing: 0.05em;
+    }
+
+    .subtitle {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      text-align: center;
+      max-width: 320px;
+      margin-bottom: 40px;
+      line-height: 1.7;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, #3a6b8c, #2a5470);
+      color: var(--text);
+      border: none;
+      border-radius: 28px;
+      padding: 14px 36px;
+      font-size: 1.05rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      min-width: 160px;
+      text-align: center;
+    }
+
+    .btn:hover, .btn:active {
+      background: linear-gradient(135deg, #4a7b9c, #3a6480);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1.5px solid var(--card-border);
+      box-shadow: none;
+      margin-top: 12px;
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #8c3a3a, #702a2a);
+    }
+
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 340px;
+    }
+
+    .choice-btn {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 16px 18px;
+      color: var(--text);
+      font-size: 0.98rem;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      line-height: 1.5;
+    }
+
+    .choice-btn:hover, .choice-btn:active {
+      background: rgba(126, 184, 218, 0.15);
+      border-color: var(--accent);
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 24px 20px;
+      max-width: 360px;
+      width: 100%;
+      margin-bottom: 24px;
+    }
+
+    .character-name {
+      font-size: 1.3rem;
+      color: var(--accent-soft);
+      margin-bottom: 8px;
+    }
+
+    .character-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    .scenario-text {
+      font-size: 1.05rem;
+      line-height: 1.75;
+      margin-bottom: 28px;
+      max-width: 360px;
+      text-align: left;
+      white-space: pre-line;
+    }
+
+    .thought-bubble {
+      background: rgba(240, 201, 160, 0.12);
+      border: 1px solid rgba(240, 201, 160, 0.35);
+      border-radius: 20px;
+      padding: 20px 22px;
+      max-width: 340px;
+      margin: 20px 0;
+      position: relative;
+      font-size: 1.1rem;
+      font-style: italic;
+      color: var(--warm);
+      text-align: center;
+    }
+
+    .section-title {
+      font-size: 1.15rem;
+      color: var(--accent-soft);
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .evidence-box {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+      max-width: 360px;
+      margin-bottom: 20px;
+    }
+
+    .evidence-col {
+      flex: 1;
+      background: var(--card-bg);
+      border-radius: 14px;
+      padding: 14px 12px;
+      border: 1px solid var(--card-border);
+    }
+
+    .evidence-col h4 {
+      font-size: 0.85rem;
+      color: var(--accent);
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .evidence-item {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      cursor: pointer;
+    }
+
+    .evidence-item:last-child {
+      border-bottom: none;
+    }
+
+    .evidence-item.selected {
+      color: var(--success);
+    }
+
+    .input-area {
+      width: 100%;
+      max-width: 340px;
+      margin: 12px 0 20px;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 80px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 14px;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-family: inherit;
+      resize: vertical;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .progress {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .progress-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(126,184,218,0.3);
+    }
+
+    .progress-dot.active {
+      background: var(--accent);
+    }
+
+    .progress-dot.done {
+      background: var(--success);
+    }
+
+    .resource-list {
+      list-style: none;
+      max-width: 340px;
+      width: 100%;
+      margin: 24px 0;
+    }
+
+    .resource-list li {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      font-size: 0.92rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .resource-list a {
+      color: var(--accent-soft);
+      text-decoration: none;
+    }
+
+    .footer-note {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 20px;
+      max-width: 300px;
+    }
+
+    .skip-link {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-top: 16px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .round-end {
+      text-align: center;
+      max-width: 340px;
+      font-size: 1.05rem;
+      line-height: 1.8;
+      color: var(--text-muted);
+      white-space: pre-line;
+    }
+
+    .highlight {
+      color: var(--accent-soft);
+    }
+
+    /* Admin styles */
+    .admin-container {
+      width: 100%;
+      max-width: 480px;
+      padding: 0 8px;
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .session-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 14px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .session-card:hover {
+      background: rgba(126, 184, 218, 0.1);
+    }
+
+    .session-card h3 {
+      font-size: 1rem;
+      color: var(--accent-soft);
+      margin-bottom: 6px;
+    }
+
+    .session-meta {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    .session-detail {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--card-border);
+      font-size: 0.9rem;
+      display: none;
+    }
+
+    .session-detail.open {
+      display: block;
+    }
+
+    .log-item {
+      margin: 8px 0;
+      padding: 8px 10px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 8px;
+      font-size: 0.88rem;
+    }
+
+    .log-label {
+      color: var(--accent);
+      font-size: 0.8rem;
+      margin-bottom: 2px;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 40px 20px;
+    }
+
+    .stats-bar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      width: 100%;
+    }
+
+    .stat-box {
+      flex: 1;
+      min-width: 100px;
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-size: 1.4rem;
+      color: var(--accent-soft);
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .admin-login {
+      max-width: 300px;
+      width: 100%;
+    }
+
+    .admin-login input {
+      width: 100%;
+      padding: 14px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      color: var(--text);
+      font-size: 1rem;
+      margin-bottom: 16px;
+      text-align: center;
+      letter-spacing: 0.15em;
+    }
+
+    .admin-login input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 開場 -->
+  <div id="screen-opening" class="screen active">
+    <div class="breathe-circle"></div>
+    <h1>你唔需要做自己</h1>
+    <p class="subtitle">呢一刻，你只需要做一個旁觀者。</p>
+    <button class="btn" onclick="goTo('character')">開始</button>
+    <button class="skip-link" style="margin-top:40px; opacity:0.4;" onclick="goTo('admin-login')">後台</button>
+  </div>
+
+  <!-- 角色設定 -->
+  <div id="screen-character" class="screen">
+    <p class="section-title">請選擇一位你將會陪伴嘅人</p>
+    <div class="btn-group" id="character-list"></div>
+    <p class="footer-note" style="margin-top:28px;">你唔係佢，你只係喺呢 15 分鐘入面，陪佢行一段路。</p>
+  </div>
+
+  <!-- 角色確認 -->
+  <div id="screen-char-confirm" class="screen">
+    <div class="card" id="char-card"></div>
+    <button class="btn" onclick="startRound(1)">開始陪伴</button>
+  </div>
+
+  <!-- 回合：情境 -->
+  <div id="screen-scenario" class="screen">
+    <div class="progress" id="progress-dots"></div>
+    <div class="scenario-text" id="scenario-text"></div>
+    <p style="color:var(--accent-soft); margin-bottom:16px; font-size:0.95rem;">你覺得佢而家最想做咩？</p>
+    <div class="btn-group" id="scenario-choices"></div>
+  </div>
+
+  <!-- 自動化想法 -->
+  <div id="screen-thought" class="screen">
+    <p class="section-title">角色心裏面出現咗一句說話</p>
+    <div class="thought-bubble" id="thought-text"></div>
+    <p style="margin:20px 0 16px; color:var(--text-muted);">呢句說話，你覺得係事實，定係一個想法？</p>
+    <div class="btn-group">
+      <button class="choice-btn" onclick="recordThoughtType('係事實'); goToCbt()">係事實</button>
+      <button class="choice-btn" onclick="recordThoughtType('係想法'); goToCbt()">係想法</button>
+      <button class="choice-btn" onclick="recordThoughtType('我唔肯定'); goToCbt()">我唔肯定</button>
+    </div>
+  </div>
+
+  <!-- CBT 檢視 -->
+  <div id="screen-cbt" class="screen">
+    <div id="cbt-content"></div>
+  </div>
+
+  <!-- 回合結束 -->
+  <div id="screen-round-end" class="screen">
+    <div class="round-end" id="round-end-text"></div>
+    <button class="btn" style="margin-top:32px;" onclick="nextAfterRound()">繼續</button>
+  </div>
+
+  <!-- 結局 -->
+  <div id="screen-ending" class="screen">
+    <div class="round-end" id="ending-text"></div>
+    <button class="btn" style="margin-top:32px;" onclick="goToReflect()">下一步</button>
+  </div>
+
+  <!-- 自我反思 -->
+  <div id="screen-reflect" class="screen">
+    <p class="section-title">而家，可以諗一諗自己</p>
+    <p class="subtitle" style="margin-bottom:24px;">呢 15 分鐘，你陪咗 <span id="reflect-name"></span> 行咗一段路。<br>佢嘅處境，有冇邊一部分你覺得好熟悉？</p>
+    
+    <div style="width:100%; max-width:340px;">
+      <p style="margin-bottom:10px; color:var(--accent-soft);">1. 角色心裏面嗰啲說話，你有冇都同自己講過？</p>
+      <textarea id="ans1" placeholder="可以寫，也可以唔寫……"></textarea>
+    </div>
+    
+    <div style="width:100%; max-width:340px; margin-top:20px;">
+      <p style="margin-bottom:10px; color:var(--accent-soft);">2. 如果今日要你同自己講一句話，你會講咩？</p>
+      <textarea id="ans2" placeholder="可以寫，也可以唔寫……"></textarea>
+    </div>
+    
+    <div style="width:100%; max-width:340px; margin-top:20px;">
+      <p style="margin-bottom:10px; color:var(--accent-soft);">3. 你覺得，你有冇資格休息？</p>
+      <textarea id="ans3" placeholder="可以寫，也可以唔寫……"></textarea>
+    </div>
+
+    <button class="btn" style="margin-top:28px;" onclick="finishReflect()">完成</button>
+    <button class="skip-link" onclick="finishReflect(true)">跳過</button>
+  </div>
+
+  <!-- 結束畫面 -->
+  <div id="screen-final" class="screen">
+    <div class="breathe-circle"></div>
+    <h1 style="font-size:1.35rem;">你唔需要做一個完美嘅照顧者</h1>
+    <p class="subtitle">
+      你只需要記得：<br>
+      你心裏面嗰啲說話，唔一定係事實。
+    </p>
+
+    <p style="color:var(--accent-soft); margin:20px 0 12px; font-size:0.95rem;">如果需要支援，可以聯絡：</p>
+    <ul class="resource-list">
+      <li>照顧者支援熱線 <a href="tel:182183">182 183</a></li>
+      <li>防止自殺會 <a href="tel:23820000">2382 0000</a></li>
+      <li>心晴行動 <a href="tel:23012303">2301 2303</a></li>
+      <li>香港家庭福利會 <a href="tel:25273171">2527 3171</a></li>
+      <li>SEN 家長資源：教育局「融情·特教」</li>
+    </ul>
+
+    <button class="btn" onclick="restart()">再玩一次</button>
+    <button class="btn btn-secondary" onclick="downloadCurrentSession()">下載本局紀錄</button>
+    <p class="footer-note">呢個遊戲只係情緒舒緩工具，唔能夠取代專業輔導或醫療建議。</p>
+  </div>
+
+  <!-- 後台登入 -->
+  <div id="screen-admin-login" class="screen">
+    <p class="section-title">後台管理</p>
+    <div class="admin-login">
+      <input type="password" id="admin-pw" placeholder="輸入密碼" maxlength="20" onkeydown="if(event.key==='Enter')checkAdmin()">
+      <button class="btn" onclick="checkAdmin()">進入</button>
+      <button class="skip-link" onclick="goTo('opening')">返回遊戲</button>
+    </div>
+    <p class="footer-note">預設密碼：bystander2026</p>
+  </div>
+
+  <!-- 後台主頁 -->
+  <div id="screen-admin" class="screen">
+    <div class="admin-container">
+      <div class="admin-header">
+        <h2 style="font-size:1.2rem; color:var(--accent-soft);">玩家紀錄後台</h2>
+        <button class="btn btn-secondary" style="padding:8px 16px; min-width:auto; font-size:0.9rem;" onclick="goTo('opening')">返回遊戲</button>
+      </div>
+
+      <div class="stats-bar" id="admin-stats"></div>
+
+      <div style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
+        <button class="btn btn-secondary" style="padding:10px 18px; min-width:auto; font-size:0.9rem;" onclick="exportAllSessions()">匯出全部 JSON</button>
+        <button class="btn btn-danger" style="padding:10px 18px; min-width:auto; font-size:0.9rem;" onclick="clearAllSessions()">清除全部紀錄</button>
+      </div>
+
+      <div id="session-list"></div>
+    </div>
+  </div>
+
+<script>
+// ========== 資料定義 ==========
+const characters = [
+  {
+    id: "ahzhen",
+    name: "阿珍",
+    age: 38,
+    desc: "患有抑鬱症三年，一直有食藥同覆診。有一個 7 歲嘅仔，兩年前確診自閉症。佢好少同人講自己嘅抑鬱，怕人哋覺得佢冇能力照顧個仔。"
+  },
+  {
+    id: "ahkeung",
+    name: "阿強",
+    age: 42,
+    desc: "患有抑鬱症，單親爸爸，照顧一個讀小四、有專注力不足及過度活躍症（ADHD）嘅女兒。"
+  },
+  {
+    id: "lee",
+    name: "李姑娘",
+    age: 45,
+    desc: "患有抑鬱症，照顧一個有語言障礙嘅仔，同時要應付工作壓力。"
+  }
+];
+
+const rounds = {
+  ahzhen: [
+    {
+      scenario: "阿珍嘅仔今日喺學校又發脾氣，老師打電話嚟，話佢推咗同學。\n阿珍收線之後，坐喺梳化，成個人發抖。\n佢望住自己嘅藥盒，諗起今日仲未食藥。",
+      choices: [
+        { text: "即刻去學校接個仔", thought: "如果連我都撐唔住，個仔點算？" },
+        { text: "坐喺度，咩都唔做，俾自己冷靜一下", thought: "我係咪好自私？我憑咩唔理個仔？" },
+        { text: "打電話俾朋友傾訴", thought: "我係咪成日都麻煩人？人哋會唔會覺得我好煩？" },
+        { text: "食藥，然後諗下一步", thought: "食藥有咩用？我食咗三年都係咁。" }
+      ],
+      supportEvidence: ["冇人可以即刻幫阿珍分擔", "阿珍一直以嚟都係自己頂住"],
+      againstEvidence: ["個仔仲有老師、治療師可以幫手", "阿珍有朋友或屋企人可以傾訴", "食藥同休息都係照顧自己嘅一部分"],
+      alternatives: [
+        "我唔係唯一一個可以幫佢嘅人。",
+        "我盡力就夠，我唔需要做到完美。",
+        "我嘅病唔係我嘅錯，我唔需要為此自責。"
+      ],
+      friendWords: [
+        "你已經做得好好。",
+        "你都需要休息。",
+        "你唔係一個人。"
+      ],
+      roundEnd: "阿珍深呼吸咗一下。\n佢冇即刻解決所有問題，但佢開始知道：\n佢心裏面嗰句說話，唔一定係事實。"
+    },
+    {
+      scenario: "夜晚，個仔終於瞓着。阿珍坐喺床邊，望住個仔嘅背影。\n佢諗起今日學校嘅電話，又諗起自己成日發脾氣、成日好攰。\n「如果我冇抑鬱，個仔會唔會好啲？」",
+      choices: [
+        { text: "輕輕摸吓個仔嘅頭，然後去瞓", thought: "我連摸吓佢都覺得自己唔配。" },
+        { text: "坐喺度繼續諗，越諗越内疚", thought: "全部都係我害到佢。" },
+        { text: "起身去沖涼，試下放鬆", thought: "我冇資格放鬆，我應該一直接住。" },
+        { text: "寫低今日嘅感受", thought: "寫完都冇用，改變唔到任何事。" }
+      ],
+      supportEvidence: ["抑鬱確實影響咗阿珍嘅精力同情緒", "個仔嘅行為問題確實存在"],
+      againstEvidence: ["自閉症唔係因為阿珍嘅抑鬱而引起", "阿珍一直有帶個仔去治療同覆診", "好多照顧者都會有類似感覺，唔代表係事實"],
+      alternatives: [
+        "個仔嘅困難同我嘅病，係兩件唔同嘅事。",
+        "我已經盡力為佢尋求幫助。",
+        "我都係一個人，有情緒係正常嘅。"
+      ],
+      friendWords: [
+        "你哋兩個都好辛苦，但你哋都好努力。",
+        "你值得被温柔對待。",
+        "休息唔等於放棄。"
+      ],
+      roundEnd: "阿珍望住個仔安靜嘅背影。\n佢仍然覺得攰，但多咗一句說話：\n「我哋兩個都係盡力。」"
+    },
+    {
+      scenario: "第二日早上，阿珍收到社工嘅訊息，問佢可唔可以傾下近況。\n阿珍望住手機，手指停喺回覆鍵上面。\n佢諗：「我又要講自己好唔好？定係繼續話『我得』？」",
+      choices: [
+        { text: "回覆「我得，唔使擔心」", thought: "我唔可以畀人知我撐唔住。" },
+        { text: "誠實講自己好攰", thought: "講咗出嚟，人哋會覺得我無能。" },
+        { text: "暫時唔回，遲啲先講", thought: "我連回覆訊息都覺得好難。" },
+        { text: "約個時間真正傾下", thought: "傾完之後，我可能會更內疚。" }
+      ],
+      supportEvidence: ["阿珍確實好少向人求助", "以前講咗之後有時會覺得更累"],
+      againstEvidence: ["社工本身就係畀人傾訴嘅", "講出嚟唔等於麻煩人", "有人知道你嘅情況，反而可以幫到你"],
+      alternatives: [
+        "求助係勇敢，唔係軟弱。",
+        "我值得被人關心。",
+        "我唔需要一個人扛晒所有。"
+      ],
+      friendWords: [
+        "你肯講出嚟，已經好叻。",
+        "有人願意聽你，係好事。",
+        "你唔使一個人。"
+      ],
+      roundEnd: "阿珍最後回覆咗社工。\n佢冇變成完美嘅人，但佢試咗一件事：\n俾自己被聽到。"
+    }
+  ],
+  ahkeung: [
+    {
+      scenario: "阿強嘅女兒今日又被老師投訴，話佢堂堂都講嘢、坐唔定。\n阿強收工返到屋企，女兒一見到佢就大叫「爸爸我今日又被罰」。\n阿強成個人僵咗，唔知應該先安慰定先責罵。",
+      choices: [
+        { text: "先抱住女兒，話佢知爸爸明白", thought: "我係咪太溺愛？會唔會害佢更唔聽話？" },
+        { text: "嚴肅同佢講規矩", thought: "我一定係教得唔夠好，所以佢先會咁。" },
+        { text: "自己去房間冷靜先", thought: "我連情緒都控制唔到，點教女兒？" },
+        { text: "打電話問前度或者屋企人意見", thought: "我又要麻煩人，我係咪好失敗？" }
+      ],
+      supportEvidence: ["女兒嘅行為問題確實反覆出現", "阿強作為單親要獨自面對"],
+      againstEvidence: ["ADHD 係神經發展問題，唔係單純教養問題", "阿強已經有帶女兒去評估同治療", "其他照顧者都會有類似掙扎"],
+      alternatives: [
+        "我已經好努力咁學點同佢相處。",
+        "我唔需要即刻有完美答案。",
+        "求助同休息都係負責任嘅表現。"
+      ],
+      friendWords: [
+        "你一個人撐住，已經好唔容易。",
+        "你女兒有你，係幸福。",
+        "你都需要被支持。"
+      ],
+      roundEnd: "阿強最後選擇先抱住女兒。\n佢仍然好攰，但多咗一句說話：\n「我哋慢慢學。」"
+    },
+    {
+      scenario: "夜晚，女兒終於瞓着。阿強坐喺客廳，望住一堆未做完嘅家務同未回覆嘅訊息。\n佢諗起自己已經好耐冇真正休息，亦好少約朋友。\n「我係咪已經失去自己？」",
+      choices: [
+        { text: "逼自己做完家務先瞓", thought: "我唔可以放低，放低就會亂。" },
+        { text: "直接去瞓，家務聽日先算", thought: "我係咪好懶？好唔負責任？" },
+        { text: "睇吓短片放鬆十分鐘", thought: "我憑咩可以放鬆？女兒仲有咁多問題。" },
+        { text: "寫低自己嘅感受", thought: "寫完都改變唔到現實。" }
+      ],
+      supportEvidence: ["家務同照顧確實需要時間", "阿強長期缺少休息"],
+      againstEvidence: ["短暫休息唔等於放棄責任", "長期透支會令情況更差", "照顧自己先可以持續照顧女兒"],
+      alternatives: [
+        "休息係為咗可以繼續走落去。",
+        "我值得有屬於自己嘅時間。",
+        "完美唔存在，盡力就夠。"
+      ],
+      friendWords: [
+        "你已經好努力。",
+        "你都係一個人，需要休息。",
+        "你唔使成日都完美。"
+      ],
+      roundEnd: "阿強最後俾自己睇咗十分鐘短片。\n世界冇即刻崩塌，佢只係多咗一點空間。"
+    },
+    {
+      scenario: "第二日，學校通知要開家長會，討論女兒嘅學習計劃。\n阿強望住通知，心裏面一沉。\n「又要面對老師嘅眼光，又要聽一堆我做唔到嘅建議。」",
+      choices: [
+        { text: "即刻回覆會出席", thought: "我一定要去，唔去就係唔負責任。" },
+        { text: "想請假，但覺得自己唔應該", thought: "我連家長會都想逃，我係咪好差？" },
+        { text: "問可唔可以改時間或者視像", thought: "人哋會唔會覺得我麻煩？" },
+        { text: "約朋友一齊去撑場", thought: "我又要靠人，我係咪好無能？" }
+      ],
+      supportEvidence: ["家長會確實有壓力", "阿強之前有過唔愉快嘅經驗"],
+      againstEvidence: ["學校有責任同家長合作", "提出合理要求唔係麻煩", "有人陪伴可以減輕壓力"],
+      alternatives: [
+        "我有權提出適合自己嘅方式。",
+        "我唔需要一個人面對所有場面。",
+        "我已經好關心女兒嘅學習。"
+      ],
+      friendWords: [
+        "你肯去已經好叻。",
+        "你唔使一個人。",
+        "你值得被支持。"
+      ],
+      roundEnd: "阿強最後選擇問可唔可以視像。\n學校答應咗。\n佢發現：有時開口，世界會讓一步。"
+    }
+  ],
+  lee: [
+    {
+      scenario: "李姑娘今日返工已經好攰，夜晚仲要帶仔去言語治療。\n治療師話進展好慢，建議增加練習時間。\n李姑娘聽完，成個人唔想郁。",
+      choices: [
+        { text: "即刻應承增加練習", thought: "我一定要更努力，唔係就係我唔夠好。" },
+        { text: "話自己需要時間考慮", thought: "我係咪太自私？只顧自己攰。" },
+        { text: "忍住情緒，微笑話「好」", thought: "我唔可以畀人睇到我撐唔住。" },
+        { text: "回家後大哭一場", thought: "我連情緒都控制唔到，點教仔？" }
+      ],
+      supportEvidence: ["治療確實需要持續練習", "李姑娘時間同精力都好有限"],
+      againstEvidence: ["進展慢唔等於失敗", "照顧者本身嘅狀態好重要", "可以同治療師商量更實際嘅方法"],
+      alternatives: [
+        "我已經好盡力配合治療。",
+        "我嘅精力都有限，需要量力而為。",
+        "慢唔係錯，我哋按自己嘅節奏。"
+      ],
+      friendWords: [
+        "你已經好努力。",
+        "你都需要被照顧。",
+        "進展唔係只得你一個人嘅責任。"
+      ],
+      roundEnd: "李姑娘最後話自己需要時間考慮。\n治療師理解咗。\n佢發現：誠實表達，唔等於失敗。"
+    },
+    {
+      scenario: "週末，朋友約李姑娘食飯。\n佢好想去，但又擔心個仔冇人照顧，亦擔心自己去咗會被覺得「唔顧家」。",
+      choices: [
+        { text: "拒絕，話自己要照顧仔", thought: "我冇資格有自己嘅時間。" },
+        { text: "去，但全程都好內疚", thought: "我係咪好自私？" },
+        { text: "問屋企人可唔可以幫手", thought: "又要麻煩人，人哋會唔會煩？" },
+        { text: "改約近啲嘅地方，帶仔一齊", thought: "帶住仔都唔係真正休息。" }
+      ],
+      supportEvidence: ["照顧責任確實存在", "李姑娘好少有自己時間"],
+      againstEvidence: ["短暫休息有助長期照顧", "朋友同屋企人有時願意幫忙", "有自己空間唔等於唔愛仔"],
+      alternatives: [
+        "我值得有屬於自己嘅時間。",
+        "休息係為咗可以更好咁照顧。",
+        "求助唔係弱，係智慧。"
+      ],
+      friendWords: [
+        "你去食個飯，世界唔會倒。",
+        "你都係一個人，需要朋友。",
+        "你值得開心。"
+      ],
+      roundEnd: "李姑娘最後問咗婆婆幫手。\n婆婆話「早應承啦」。\n佢去咗食飯，發現自己原來仲記得點樣笑。"
+    },
+    {
+      scenario: "夜晚，個仔終於瞓着。李姑娘望住電腦，仲有未完成嘅工作報告。\n佢知道聽日要交，但眼睛已經好乾。\n「我係咪兩邊都做唔好？」",
+      choices: [
+        { text: "逼自己做完報告", thought: "我唔可以喺工作上面都失敗。" },
+        { text: "去瞓，聽早再起身做", thought: "我係咪好唔負責任？" },
+        { text: "只做最重要嘅部分", thought: "我係咪已經降低標準？" },
+        { text: "請假話自己身體唔舒服", thought: "我又要用藉口，我係咪好差？" }
+      ],
+      supportEvidence: ["工作同照顧確實兩邊都有壓力", "李姑娘長期睡眠不足"],
+      againstEvidence: ["身體有極限，硬撑會更差", "有時調整優先次序係必要", "真正失敗係完全放棄自己"],
+      alternatives: [
+        "我已經同時應付兩份重擔。",
+        "量力而為唔係偷懶。",
+        "我嘅健康都好重要。"
+      ],
+      friendWords: [
+        "你已經好拚。",
+        "你唔使完美。",
+        "你值得被體諒。"
+      ],
+      roundEnd: "李姑娘最後選擇只做最重要嘅部分，然後去瞓。\n聽日報告交得出。\n佢發現：原來唔需要每次都滿分。"
+    }
+  ]
+};
+
+// ========== 遊戲狀態 ==========
+let currentChar = null;
+let currentRound = 1;
+let currentThought = "";
+let cbtStep = 0;
+let sessionLog = null; // 當前遊戲紀錄
+
+const ADMIN_PASSWORD = "bystander2026";
+const STORAGE_KEY = "bystander_sessions";
+
+// ========== 紀錄系統 ==========
+function createSession() {
+  sessionLog = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+    startTime: new Date().toISOString(),
+    endTime: null,
+    character: null,
+    rounds: [],
+    reflection: {
+      q1: "",
+      q2: "",
+      q3: "",
+      skipped: false
+    },
+    completed: false
+  };
+}
+
+function saveSessionToStorage() {
+  if (!sessionLog) return;
+  sessionLog.endTime = new Date().toISOString();
+  const sessions = getAllSessions();
+  // 更新或新增
+  const idx = sessions.findIndex(s => s.id === sessionLog.id);
+  if (idx >= 0) {
+    sessions[idx] = sessionLog;
+  } else {
+    sessions.unshift(sessionLog);
+  }
+  // 最多保留 200 筆
+  if (sessions.length > 200) sessions.length = 200;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+}
+
+function getAllSessions() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function clearAllSessions() {
+  if (confirm("確定要清除全部玩家紀錄？此操作無法復原。")) {
+    localStorage.removeItem(STORAGE_KEY);
+    renderAdmin();
+  }
+}
+
+// ========== 畫面控制 ==========
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goTo(name) {
+  show('screen-' + name);
+  if (name === 'admin') renderAdmin();
+}
+
+// ========== 遊戲流程 ==========
+function renderCharacters() {
+  const list = document.getElementById('character-list');
+  list.innerHTML = '';
+  characters.forEach(c => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerHTML = `<strong>${c.name}（${c.age}歲）</strong><br><span style="font-size:0.88rem;color:var(--text-muted)">${c.desc.slice(0, 42)}…</span>`;
+    btn.onclick = () => selectChar(c);
+    list.appendChild(btn);
+  });
+}
+
+function selectChar(c) {
+  currentChar = c;
+  createSession();
+  sessionLog.character = { id: c.id, name: c.name };
+
+  const card = document.getElementById('char-card');
+  card.innerHTML = `
+    <div class="character-name">${c.name} · ${c.age}歲</div>
+    <div class="character-desc">${c.desc}</div>
+  `;
+  show('screen-char-confirm');
+}
+
+function startRound(n) {
+  currentRound = n;
+  cbtStep = 0;
+  const data = rounds[currentChar.id][n - 1];
+
+  // 初始化本回合紀錄
+  if (!sessionLog.rounds[n - 1]) {
+    sessionLog.rounds[n - 1] = {
+      round: n,
+      choice: null,
+      thought: null,
+      thoughtType: null,
+      selectedSupport: [],
+      selectedAgainst: [],
+      alternative: null,
+      friendWord: null,
+      friendCustom: null
+    };
+  }
+
+  // progress dots
+  const dots = document.getElementById('progress-dots');
+  dots.innerHTML = '';
+  for (let i = 1; i <= 3; i++) {
+    const d = document.createElement('div');
+    d.className = 'progress-dot' + (i < n ? ' done' : i === n ? ' active' : '');
+    dots.appendChild(d);
+  }
+
+  document.getElementById('scenario-text').innerText = data.scenario;
+  const choices = document.getElementById('scenario-choices');
+  choices.innerHTML = '';
+  data.choices.forEach((ch, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerText = ch.text;
+    btn.onclick = () => {
+      currentThought = ch.thought;
+      sessionLog.rounds[n - 1].choice = ch.text;
+      sessionLog.rounds[n - 1].thought = ch.thought;
+      document.getElementById('thought-text').innerText = '「' + ch.thought + '」';
+      show('screen-thought');
+    };
+    choices.appendChild(btn);
+  });
+  show('screen-scenario');
+}
+
+function recordThoughtType(type) {
+  sessionLog.rounds[currentRound - 1].thoughtType = type;
+}
+
+function goToCbt() {
+  cbtStep = 1;
+  renderCbt();
+  show('screen-cbt');
+}
+
+function renderCbt() {
+  const data = rounds[currentChar.id][currentRound - 1];
+  const container = document.getElementById('cbt-content');
+  const roundLog = sessionLog.rounds[currentRound - 1];
+
+  if (cbtStep === 1) {
+    container.innerHTML = `
+      <p class="section-title">第一問：證據喺邊？</p>
+      <p style="text-align:center; margin-bottom:16px; color:var(--text-muted); max-width:340px;">
+        「${currentThought}」<br>你覺得呢個想法，有咩證據支持？有咩證據唔支持？
+      </p>
+      <div class="evidence-box">
+        <div class="evidence-col">
+          <h4>支持嘅證據</h4>
+          ${data.supportEvidence.map((e, i) => `<div class="evidence-item" data-type="support" data-text="${e}" onclick="toggleEvidence(this)">${e}</div>`).join('')}
+        </div>
+        <div class="evidence-col">
+          <h4>唔支持嘅證據</h4>
+          ${data.againstEvidence.map((e, i) => `<div class="evidence-item" data-type="against" data-text="${e}" onclick="toggleEvidence(this)">${e}</div>`).join('')}
+        </div>
+      </div>
+      <button class="btn" onclick="cbtStep=2; renderCbt();">下一步</button>
+    `;
+  } else if (cbtStep === 2) {
+    // 儲存已選證據
+    roundLog.selectedSupport = Array.from(document.querySelectorAll('.evidence-item.selected[data-type="support"]')).map(el => el.dataset.text);
+    roundLog.selectedAgainst = Array.from(document.querySelectorAll('.evidence-item.selected[data-type="against"]')).map(el => el.dataset.text);
+
+    container.innerHTML = `
+      <p class="section-title">第二問：有冇其他可能？</p>
+      <p style="text-align:center; margin-bottom:16px; color:var(--text-muted); max-width:340px;">
+        除咗「${currentThought}」，仲有冇其他可能嘅講法？
+      </p>
+      <div class="btn-group">
+        ${data.alternatives.map(a => `<button class="choice-btn" onclick="selectAlternative('${a.replace(/'/g, "\\'")}')">${a}</button>`).join('')}
+      </div>
+      <button class="skip-link" onclick="selectAlternative('(玩家自己諗)')">我自己諗</button>
+    `;
+  } else if (cbtStep === 3) {
+    container.innerHTML = `
+      <p class="section-title">第三問：如果係你朋友</p>
+      <p style="text-align:center; margin-bottom:16px; color:var(--text-muted); max-width:340px;">
+        如果 ${currentChar.name} 係你朋友，你會點同佢講？
+      </p>
+      <div class="btn-group">
+        ${data.friendWords.map(w => `<button class="choice-btn" onclick="selectFriendWord('${w.replace(/'/g, "\\'")}')">${w}</button>`).join('')}
+      </div>
+      <div class="input-area">
+        <textarea id="friend-input" placeholder="或者自己寫一句……"></textarea>
+      </div>
+      <button class="btn" onclick="selectFriendWord(null)">完成呢一回合</button>
+    `;
+  }
+}
+
+function toggleEvidence(el) {
+  el.classList.toggle('selected');
+}
+
+function selectAlternative(text) {
+  sessionLog.rounds[currentRound - 1].alternative = text;
+  cbtStep = 3;
+  renderCbt();
+}
+
+function selectFriendWord(preset) {
+  const custom = document.getElementById('friend-input')?.value?.trim() || "";
+  sessionLog.rounds[currentRound - 1].friendWord = preset;
+  sessionLog.rounds[currentRound - 1].friendCustom = custom || null;
+  finishRound();
+}
+
+function finishRound() {
+  const data = rounds[currentChar.id][currentRound - 1];
+  document.getElementById('round-end-text').innerText = data.roundEnd;
+  saveSessionToStorage(); // 每回合都存一次
+  show('screen-round-end');
+}
+
+function nextAfterRound() {
+  if (currentRound < 3) {
+    startRound(currentRound + 1);
+  } else {
+    document.getElementById('ending-text').innerHTML = `
+      ${currentChar.name} 冇變成一個完美嘅照顧者。<br>
+      佢仍然有抑鬱，仍然會攰，仍然會覺得自己唔夠好。<br><br>
+      但今日，佢學識咗一件事：<br>
+      <span class="highlight">佢心裏面嗰啲「我唔夠好」、「係我害到佢」、「我唔配休息」嘅說話，唔一定係事實。</span>
+    `;
+    show('screen-ending');
+  }
+}
+
+function goToReflect() {
+  document.getElementById('reflect-name').innerText = currentChar.name;
+  show('screen-reflect');
+}
+
+function finishReflect(skipped = false) {
+  sessionLog.reflection = {
+    q1: document.getElementById('ans1').value.trim(),
+    q2: document.getElementById('ans2').value.trim(),
+    q3: document.getElementById('ans3').value.trim(),
+    skipped: skipped
+  };
+  sessionLog.completed = true;
+  sessionLog.endTime = new Date().toISOString();
+  saveSessionToStorage();
+  show('screen-final');
+}
+
+function restart() {
+  currentChar = null;
+  currentRound = 1;
+  currentThought = "";
+  cbtStep = 0;
+  sessionLog = null;
+  document.getElementById('ans1').value = '';
+  document.getElementById('ans2').value = '';
+  document.getElementById('ans3').value = '';
+  show('screen-opening');
+}
+
+// ========== 下載本局 ==========
+function downloadCurrentSession() {
+  if (!sessionLog) {
+    alert("本局尚未有紀錄");
+    return;
+  }
+  const blob = new Blob([JSON.stringify(sessionLog, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `bystander_${sessionLog.character?.name || "session"}_${sessionLog.id}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ========== 後台 ==========
+function checkAdmin() {
+  const pw = document.getElementById('admin-pw').value;
+  if (pw === ADMIN_PASSWORD) {
+    document.getElementById('admin-pw').value = '';
+    goTo('admin');
+  } else {
+    alert("密碼錯誤");
+  }
+}
+
+function renderAdmin() {
+  const sessions = getAllSessions();
+  const stats = document.getElementById('admin-stats');
+  const list = document.getElementById('session-list');
+
+  const completed = sessions.filter(s => s.completed).length;
+  const charCount = {};
+  sessions.forEach(s => {
+    const n = s.character?.name || "未知";
+    charCount[n] = (charCount[n] || 0) + 1;
+  });
+
+  stats.innerHTML = `
+    <div class="stat-box"><div class="stat-num">${sessions.length}</div><div class="stat-label">總遊玩次數</div></div>
+    <div class="stat-box"><div class="stat-num">${completed}</div><div class="stat-label">完成遊戲</div></div>
+    <div class="stat-box"><div class="stat-num">${Object.keys(charCount).length}</div><div class="stat-label">角色被選</div></div>
+  `;
+
+  if (sessions.length === 0) {
+    list.innerHTML = `<div class="empty-state">尚未有任何遊玩紀錄。<br>玩家完成遊戲後，紀錄會自動出現喺呢度。</div>`;
+    return;
+  }
+
+  list.innerHTML = sessions.map((s, idx) => {
+    const start = new Date(s.startTime);
+    const timeStr = start.toLocaleString("zh-HK", { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+    const status = s.completed ? "✅ 完成" : "⏳ 未完成";
+    return `
+      <div class="session-card" onclick="toggleDetail(${idx})">
+        <h3>${s.character?.name || "未知角色"} · ${status}</h3>
+        <div class="session-meta">${timeStr} · ID: ${s.id}</div>
+        <div class="session-detail" id="detail-${idx}">
+          ${renderSessionDetail(s)}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderSessionDetail(s) {
+  let html = "";
+  (s.rounds || []).forEach((r, i) => {
+    if (!r) return;
+    html += `<div class="log-item">
+      <div class="log-label">回合 ${r.round}</div>
+      <div>選擇：${r.choice || "—"}</div>
+      <div>自動化想法：${r.thought || "—"}</div>
+      <div>判斷：${r.thoughtType || "—"}</div>
+      <div>支持證據：${(r.selectedSupport || []).join("、") || "—"}</div>
+      <div>唔支持證據：${(r.selectedAgainst || []).join("、") || "—"}</div>
+      <div>其他可能：${r.alternative || "—"}</div>
+      <div>朋友說話：${r.friendWord || r.friendCustom || "—"}</div>
+      ${r.friendCustom && r.friendWord ? `<div>自訂說話：${r.friendCustom}</div>` : ""}
+    </div>`;
+  });
+
+  if (s.reflection) {
+    html += `<div class="log-item">
+      <div class="log-label">自我反思 ${s.reflection.skipped ? "(已跳過)" : ""}</div>
+      <div>Q1：${s.reflection.q1 || "—"}</div>
+      <div>Q2：${s.reflection.q2 || "—"}</div>
+      <div>Q3：${s.reflection.q3 || "—"}</div>
+    </div>`;
+  }
+  return html || "<div style='color:var(--text-muted)'>尚無詳細資料</div>";
+}
+
+function toggleDetail(idx) {
+  const el = document.getElementById("detail-" + idx);
+  el.classList.toggle("open");
+}
+
+function exportAllSessions() {
+  const sessions = getAllSessions();
+  if (sessions.length === 0) {
+    alert("冇任何紀錄可匯出");
+    return;
+  }
+  const blob = new Blob([JSON.stringify(sessions, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `bystander_all_sessions_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ========== 初始化 ==========
+renderCharacters();
+</script>
+</body>
+</html>
